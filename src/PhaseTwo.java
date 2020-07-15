@@ -6,7 +6,8 @@ import java.util.*;
 
 public class PhaseTwo {
 
-    PhaseTwo() {}
+    PhaseTwo() {
+    }
 
     Comparator<String> employeeIdAndDateComparator = new Comparator<String>() {
         @Override
@@ -41,7 +42,7 @@ public class PhaseTwo {
         System.gc();
         Runtime runtime = Runtime.getRuntime();
         long usedMemory = runtime.totalMemory() - runtime.freeMemory();
-        return (runtime.totalMemory() - usedMemory)/3;
+        return (runtime.totalMemory() - usedMemory) / 3;
     }
 
     int readFileAndDivideIntoBlocks(File file, long usableMemorySize) throws IOException {
@@ -54,35 +55,35 @@ public class PhaseTwo {
         int index = 0;
         int count = 0;
         while ((tuple = bufferedReader.readLine()) != null) {
-        	if(count >= Configuration.MAX_TUPLES) {
+            if (count >= Configuration.MAX_TUPLES) {
                 File tempBlock = sortBlock(blockData, index);
                 blockFiles.add(tempBlock);
                 index++;
                 count = 0;
                 blockData.clear();
-           }
+            }
             if (tuple != null) {
                 blockData.add(tuple);
                 count++;
             }
         }
-        if(!blockData.isEmpty()) {
-        	index++;
-        	File tempBlock = sortBlock(blockData, index);
+        if (!blockData.isEmpty()) {
+            index++;
+            File tempBlock = sortBlock(blockData, index);
             blockFiles.add(tempBlock);
         }
-        System.out.println("Total Number Of Blocks: "+index);
+        System.out.println("Total Number Of Blocks: " + index);
         createBiggerBlocks(blockFiles);
         return index;
     }
 
     File sortBlock(ArrayList<String> blockData, int index) throws IOException {
-    	FileWriter fileWriter = null;
+        FileWriter fileWriter = null;
         BufferedWriter bufferedWriter = null;
         Collections.sort(blockData, employeeIdAndDateComparator);
         File dir = new File(Configuration.BLOCK_FILE_PATH);
-        if(!dir.exists()) {
-        	dir.mkdirs(); 
+        if (!dir.exists()) {
+            dir.mkdirs();
         }
         File tempBlock = new File(Configuration.BLOCK_FILE_PATH + File.separator + Configuration.BLOCK_NAME + index);
         tempBlock.createNewFile();
@@ -96,27 +97,27 @@ public class PhaseTwo {
         bufferedWriter.close();
         return tempBlock;
     }
-    
+
     void createBiggerBlocks(ArrayList<File> blockFiles) throws IOException {
-    	System.out.println("Bigger blocks");
-    	ArrayList<Handler> FileHandler = new ArrayList<>();
-    	int index = 0;
-    	int i =0;
-    	ArrayList<File> biggerBlocks = new ArrayList<>();
+        System.out.println("Bigger blocks");
+        ArrayList<Handler> FileHandler = new ArrayList<>();
+        int index = 0;
+        int i = 0;
+        ArrayList<File> biggerBlocks = new ArrayList<>();
         for (File blockFile : blockFiles) {
-        	if(i>=250) {
-            	i=0;
-            	biggerBlocks.add(merge(FileHandler,index));
-            	FileHandler.clear();
-            	index++;
+            if (i >= 250) {
+                i = 0;
+                biggerBlocks.add(merge(FileHandler, index));
+                FileHandler.clear();
+                index++;
             }
-        	FileHandler.add(new Handler(new BufferedReader(new FileReader(blockFile))));
+            FileHandler.add(new Handler(new BufferedReader(new FileReader(blockFile))));
             i++;
         }
-        if(i!=0) {
-        	biggerBlocks.add(merge(FileHandler,index));
-        	FileHandler.clear();
-        	i=0;
+        if (i != 0) {
+            biggerBlocks.add(merge(FileHandler, index));
+            FileHandler.clear();
+            i = 0;
         }
         System.out.println("Merging Bigger Blocks");
         createBufferReaderObjectsOfBlocks(biggerBlocks);
@@ -130,8 +131,8 @@ public class PhaseTwo {
         merge(FileHandler, -1);
     }
 
-    File merge(ArrayList<Handler> FileHandler,int index) throws IOException {
-        File outputFile = new File(Configuration.FILE_PATH, Configuration.DUPLICATE_OUTPUT_FILE_NAME+index+".txt");
+    File merge(ArrayList<Handler> FileHandler, int index) throws IOException {
+        File outputFile = new File(Configuration.FILE_PATH, Configuration.DUPLICATE_OUTPUT_FILE_NAME + index + ".txt");
         FileWriter fileWriter = new FileWriter(outputFile);
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
@@ -146,8 +147,8 @@ public class PhaseTwo {
                 priorityQueue.add(bufferedBlock);
             }
         }
-        while (priorityQueue.size() > 0) {	
-        	Handler block = priorityQueue.poll();
+        while (priorityQueue.size() > 0) {
+            Handler block = priorityQueue.poll();
             bufferedWriter.write(block.readAndRemoveFromFile());
             bufferedWriter.newLine();
             if (!block.isEmpty()) {
